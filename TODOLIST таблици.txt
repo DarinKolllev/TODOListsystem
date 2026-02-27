@@ -1,0 +1,29 @@
+TODOLIST таблици:
+
+1.Notes
+Note GuId   
+bool active & completed notes 
+int Foreign key от User
+int Note history & date
+Shared notes
+Deleted notes
+Assigned notes 
+string? note content
+
+
+
+
+2. User
+User Id
+string User Name (first and last)
+string User Info and email
+int User date
+bool User role ( User is either a normal user or an admin)
+Default Admin user account
+int User notes
+
+
+
+
+
+
