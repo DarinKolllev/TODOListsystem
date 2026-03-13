@@ -1,8 +1,86 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .calendar-container {
+        position: absolute;
+        top: 90px;
+        right: 40px;
+        width: 400px;
+        background: white;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+
+    #calendar {
+        font-size: 0.8rem;
+    }
+
+    @@media (max-width: 768px) {
+        .calendar-container
+
+    {
+        position: static;
+        width: 100%;
+        margin: 20px auto;
+    }
+
+    #calendar {
+        font-size: 0.7rem;
+    }
+
+    }
+    
+</style>
+
+<div class="calendar-container">
+    <div id="calendar"></div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: window.innerWidth <= 768 ? 'listWeek' : 'dayGridMonth',
+                height: window.innerWidth <= 768 ? 'auto' : 350,
+                selectable: true,
+                events: '/Home/GetEvents',
+
+                dateClick: function(info) {
+                    var title = prompt("Enter event title:");
+                    if (title) {
+                        fetch('/Home/AddEvent', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                title: title,
+                                start: info.dateStr
+                            })
+                        }).then(() => {
+                            calendar.refetchEvents();
+                        });
+                    }
+                }
+            });
+
+            calendar.render();
+
+            window.addEventListener('resize', function() {
+                if(window.innerWidth <= 768) {
+                    calendar.changeView('listWeek');
+                    calendar.setOption('height', 'auto');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                    calendar.setOption('height', 350);
+                }
+            });
+        });
+    </script>
+}
