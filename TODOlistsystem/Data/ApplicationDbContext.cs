@@ -13,11 +13,13 @@ namespace TODOlistsystem.Data
         protected override void OnModelCreating(ModelBuilder builder) {
             base.OnModelCreating(builder);
 
-            builder.Entity<Note>(entity => {
-                entity.HasIndex(n => n.UserId);
-                entity.HasIndex(n => n.IsDeleted);
-                entity.HasIndex(n => n.DueDate);
-            });
+            // Configure Note → User relationship
+            builder.Entity<Note>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notes)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
+        
     }
 }
