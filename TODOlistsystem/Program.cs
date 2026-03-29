@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+Ôªøusing Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TODOlistsystem.Data;
 using TODOlistsystem.Models;
@@ -14,7 +14,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlite(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -32,9 +32,12 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// Seed Admin User
+// Apply Migrations and Seed Admin User
 using (var scope = app.Services.CreateScope()) {
     var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    await context.Database.MigrateAsync();
+
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     await DbInitializer.SeedAdminAsync(userManager, roleManager);
@@ -57,7 +60,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();   // ÃÕŒ√Œ ¬¿∆ÕŒ
+app.UseAuthentication();   // –ú–ù–û–ì–û –í–ê–ñ–ù–û
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -67,3 +70,4 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
