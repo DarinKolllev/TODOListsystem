@@ -1,4 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --bg-color: #f8fafc;
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+}
 
 html {
   font-size: 14px;
@@ -15,60 +26,227 @@ html {
 body {
   margin-bottom: 60px;
   font-family: 'Inter', sans-serif;
-  background-color: #f4f7f6;
-  color: #333;
+  color: var(--text-main);
+  background-color: var(--bg-color);
+  background-image: 
+    radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(236, 72, 153, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 60%);
+  background-attachment: fixed;
 }
 
-/* Modern Inputs and Buttons */
-.btn {
-  border-radius: 8px;
-  font-weight: 500;
-  padding: 0.5rem 1.25rem;
-  transition: all 0.2s;
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+  font-family: 'Outfit', sans-serif;
 }
 
-.btn-primary {
-  background-color: #4f46e5;
-  border-color: #4f46e5;
+/* Glassmorphism Classes */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 20px;
 }
 
-.btn-primary:hover {
-  background-color: #4338ca;
-  border-color: #4338ca;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+.text-gradient {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.25);
-  border-color: #818cf8;
-}
-
-.form-control {
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  padding: 0.6rem 1rem;
-}
-
-/* Cards (Applies to Identity UI and custom cards) */
-.card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  background: white;
-}
-
-.card-header {
-  background-color: transparent;
-  border-bottom: 1px solid #f3f4f6;
-  font-weight: 600;
-  padding: 1.25rem;
-}
-
-/* Navbar updates */
+/* Navbar */
 .navbar {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+  transition: all 0.3s ease;
+  padding: 1rem 0;
+}
+
+.navbar-brand {
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .nav-link {
   font-weight: 500;
+  color: var(--text-main) !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #6366f1 !important;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 12px;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.3px;
+  padding: 0.7rem 1.6rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+}
+
+.btn-primary {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.btn-outline-secondary {
+  background: white;
+  color: var(--text-main);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.btn-outline-secondary:hover {
+  background: #f8fafc;
+  color: #6366f1;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+}
+
+/* inputs */
+.form-control {
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  padding: 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+  background: #fff;
+}
+
+/* Cards */
+.card {
+  border: none;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 2.5rem;
+}
+
+/* FullCalendar Customizations */
+.fc {
+  font-family: 'Inter', sans-serif;
+  --fc-border-color: #e2e8f0;
+  --fc-button-text-color: var(--text-main);
+  --fc-button-bg-color: white;
+  --fc-button-border-color: #e2e8f0;
+  --fc-button-hover-bg-color: #f8fafc;
+  --fc-button-hover-border-color: #cbd5e1;
+  --fc-button-active-bg-color: #f1f5f9;
+  --fc-button-active-border-color: #cbd5e1;
+  --fc-event-bg-color: transparent;
+  --fc-event-border-color: transparent;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border: 1px solid var(--fc-border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.fc-col-header-cell {
+  background: rgba(248, 250, 252, 0.5);
+  padding: 12px 0 !important;
+}
+
+.fc-col-header-cell-cushion {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.fc-daygrid-day-number {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 8px !important;
+}
+
+.fc-event {
+  border-radius: 8px;
+  background: var(--secondary-gradient) !important;
+  color: white !important;
+  padding: 3px 6px;
+  font-size: 0.85em;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none !important;
+  margin-top: 2px;
+}
+
+.fc-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+}
+
+.fc .fc-button-primary {
+  border-radius: 10px;
+  text-transform: capitalize;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  transition: all 0.2s;
+}
+
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:hover {
+  color: #6366f1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.fc-toolbar-title {
+  font-weight: 800 !important;
+  color: var(--text-main);
+  font-size: 1.75rem !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-section {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.hero-section h1 {
+  line-height: 1.2;
 }
