@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TODOlistsystem.Data;
 using TODOlistsystem.Models;
 using static System.Formats.Asn1.AsnWriter;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 // Connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -26,9 +24,10 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// MVC
+// MVC and Blazor Server
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 
@@ -42,7 +41,6 @@ using (var scope = app.Services.CreateScope()) {
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     await DbInitializer.SeedAdminAsync(userManager, roleManager);
 }
-
 
 // Pipeline
 if (app.Environment.IsDevelopment())
@@ -60,14 +58,17 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();   // МНОГО ВАЖНО
+app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
+
+// Identity endpoints still need MVC/Razor Pages
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 app.MapRazorPages();
 
 app.Run();
-
