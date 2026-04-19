@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TODOlistsystem.Data;
 using TODOlistsystem.Models;
-using static System.Formats.Asn1.AsnWriter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,15 +23,15 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// MVC and Blazor Server
-builder.Services.AddControllersWithViews();
+// MVC Only
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); ;
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 
-// Apply Migrations and Seed Admin User
-using (var scope = app.Services.CreateScope()) {
+// Seed Admin User
+using (var scope = app.Services.CreateScope())
+{
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
     await context.Database.MigrateAsync();
@@ -61,14 +60,10 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
-
-// Identity endpoints still need MVC/Razor Pages
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapRazorPages();
 
 app.Run();

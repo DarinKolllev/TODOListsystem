@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="container py-5 text-center hero-section">
+    <h1 class="display-4 fw-bold mb-3">Manage Your Tasks with Ease</h1>
+    <p class="lead text-muted mb-5">
+        Organize your schedule, add events, and stay productive with our TODO List System.
+    </p>
+
+    @if (User?.Identity?.IsAuthenticated != true)
+    {
+            <div class="mb-5">
+                <a class="btn btn-primary btn-lg px-4 me-2" asp-area="Identity" asp-page="/Account/Register">Get Started</a>
+                <a class="btn btn-outline-secondary btn-lg px-4" asp-area="Identity" asp-page="/Account/Login">Sign In</a>
+            </div>
+    }
+    else
+    {
+            <div class="mb-5">
+                <a class="btn btn-primary btn-lg px-4" asp-controller="Notes" asp-action="Index">View My Notes</a>
+            </div>
+    }
+</div>
