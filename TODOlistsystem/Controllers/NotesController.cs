@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,9 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TODOlistsystem.Data;
+using TODOlistsystem.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TODOlistsystem.Controllers
 {
+    [Authorize]
     public class NotesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -47,25 +52,38 @@ namespace TODOlistsystem.Controllers
         // GET: Notes/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
         // POST: Notes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Content,IsActive,IsCompleted,IsDeleted,CreatedAt,UpdatedAt,DueDate,UserId,SharedWithUserId,AssignedToUserId")] Note note)
+        public async Task<IActionResult> Create([Bind("Content,DueDate")] Note note)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account", new { area = "Identity" });
+            }
+
+            note.Id = Guid.NewGuid();
+            note.UserId = userId;
+            note.CreatedAt = DateTime.UtcNow;
+            note.IsActive = true;
+            note.IsCompleted = false;
+            note.IsDeleted = false;
+
+            ModelState.Remove("UserId");
+            ModelState.Remove("User");
+
             if (ModelState.IsValid)
             {
-                note.Id = Guid.NewGuid();
                 _context.Add(note);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", note.UserId);
+
             return View(note);
         }
 
@@ -82,44 +100,46 @@ namespace TODOlistsystem.Controllers
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", note.UserId);
             return View(note);
         }
 
         // POST: Notes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Content,IsActive,IsCompleted,IsDeleted,CreatedAt,UpdatedAt,DueDate,UserId,SharedWithUserId,AssignedToUserId")] Note note)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Content,IsCompleted,DueDate")] Note note)
         {
             if (id != note.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var existingNote = await _context.Notes.FindAsync(id);
+            if (existingNote == null)
             {
-                try
-                {
-                    _context.Update(note);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!NoteExists(note.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", note.UserId);
-            return View(note);
+
+            existingNote.Content = note.Content;
+            existingNote.IsCompleted = note.IsCompleted;
+            existingNote.DueDate = note.DueDate;
+            existingNote.UpdatedAt = DateTime.UtcNow;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!NoteExists(note.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Notes/Delete/5

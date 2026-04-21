@@ -3,30 +3,34 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TODOlistsystem.Models;
 
-public class Note
+namespace TODOlistsystem.Models
 {
 
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public class Note
+    {
 
-    [Required]
-    [StringLength(5000)]
-    public string Content { get; set; } = string.Empty;
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-    public bool IsActive { get; set; } = true;
-    public bool IsCompleted { get; set; } = false;
-    public bool IsDeleted { get; set; } = false;
+        [Required]
+        [StringLength(5000)]
+        public string Content { get; set; } = string.Empty;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
-    public DateTime? DueDate { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool IsCompleted { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
 
-    [Required]
-    public string UserId { get; set; } = null!;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? DueDate { get; set; }
 
-    [ForeignKey("UserId")]
-    public virtual ApplicationUser User { get; set; } = null!;
+        [Required]
+        public string UserId { get; set; } = null!;
 
-    public string? SharedWithUserId { get; set; }
-    public string? AssignedToUserId { get; set; }
+        [ForeignKey("UserId")]
+        public virtual ApplicationUser User { get; set; } = null!;
+
+        public string? SharedWithUserId { get; set; }
+        public string? AssignedToUserId { get; set; }
+    }
 }
