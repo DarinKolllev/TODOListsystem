@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TODOlistsystem.Models;
 
@@ -9,6 +9,7 @@ namespace TODOlistsystem.Data
             : base(options) {
         }
         public DbSet<Note> Notes { get; set; }
+        public DbSet<DailyStepLog> StepLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder) {
             base.OnModelCreating(builder);

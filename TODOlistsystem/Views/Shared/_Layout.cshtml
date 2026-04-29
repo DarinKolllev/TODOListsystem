@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TODO List System</title>
+    <title>@ViewData["Title"] - TaskFlow</title>
     <base href="~/" />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -14,13 +14,12 @@
     <link rel="stylesheet" href="~/TODOlistsystem.styles.css" asp-append-version="true" />
 </head>
 
-<body>
+<body class="app-body">
     <header>
-        <nav class="navbar navbar-expand-lg sticky-top">
+        <nav class="navbar navbar-expand-lg sticky-top app-navbar">
             <div class="container">
-
-                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
-                    TODO System
+                <a class="navbar-brand fw-bold app-brand" asp-controller="Home" asp-action="Index">
+                    TaskFlow
                 </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
@@ -29,40 +28,40 @@
 
                 <div class="collapse navbar-collapse" id="navbarMain">
 
-                    <ul class="navbar-nav me-auto">
-
+                    <ul class="navbar-nav me-auto app-nav-links">
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">
-                                Home
+                                Dashboard
                             </a>
                         </li>
-
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Privacy">
-                                Privacy
+                            <a class="nav-link" asp-controller="Notes" asp-action="Index">
+                                Tasks
                             </a>
                         </li>
-
                     </ul>
 
-                    <!-- Login / Register -->
-                    <partial name="_LoginPartial" />
+                    <div class="d-flex align-items-center gap-2 ms-auto">
+                        <button type="button" id="themeToggle" class="btn btn-sm btn-outline-secondary theme-toggle-btn" aria-label="Toggle theme">
+                            Dark mode
+                        </button>
+                        <partial name="_LoginPartial" />
+                    </div>
 
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container mt-5 pt-3">
+    <div class="container app-main-container">
         <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-5">
+    <footer class="footer app-footer text-muted mt-5">
         <div class="container text-center py-3">
-            &copy; 2026 - TODO List System |
-            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - TaskFlow. Stay focused, ship daily.
         </div>
     </footer>
 

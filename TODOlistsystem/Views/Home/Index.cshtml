@@ -1,24 +1,584 @@
-﻿@{
+@{
     ViewData["Title"] = "Home";
 }
 
-<div class="container py-5 text-center hero-section">
-    <h1 class="display-4 fw-bold mb-3">Manage Your Tasks with Ease</h1>
-    <p class="lead text-muted mb-5">
-        Organize your schedule, add events, and stay productive with our TODO List System.
-    </p>
+@if (User?.Identity?.IsAuthenticated != true)
+{
+    <div class="container py-5 text-center hero-section">
+        <h1 class="display-4 fw-bold mb-3">Manage Your Tasks with Ease</h1>
+        <p class="lead text-muted mb-5">
+            Organize your schedule, add events, and stay productive with our TODO List System.
+        </p>
+        <div class="mb-5">
+            <a class="btn btn-primary btn-lg px-4 me-2" asp-area="Identity" asp-page="/Account/Register">Get Started</a>
+            <a class="btn btn-outline-secondary btn-lg px-4" asp-area="Identity" asp-page="/Account/Login">Sign In</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-12 col-md-8">
+                <h2 class="fw-bold">Welcome back, @User.Identity.Name!</h2>
+                <p class="text-muted">Here is your daily dashboard.</p>
+            </div>
+            <div class="col-12 col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-inline-flex gap-3">
+                    <div class="text-center px-3 border-end border-secondary">
+                        <span class="d-block text-muted small text-uppercase fw-bold">Points</span>
+                        <span class="fs-4 fw-bold text-gradient" id="userPoints">0</span>
+                    </div>
+                    <div class="text-center px-3">
+                        <span class="d-block text-muted small text-uppercase fw-bold">Daily Streak</span>
+                        <span class="fs-4 fw-bold text-warning"><i class="bi bi-fire"></i> <span id="userStreak">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    @if (User?.Identity?.IsAuthenticated != true)
-    {
-            <div class="mb-5">
-                <a class="btn btn-primary btn-lg px-4 me-2" asp-area="Identity" asp-page="/Account/Register">Get Started</a>
-                <a class="btn btn-outline-secondary btn-lg px-4" asp-area="Identity" asp-page="/Account/Login">Sign In</a>
+        <div class="row g-4">
+            <div class="col-12 col-lg-4">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Task Overview</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Progress</span>
+                            <span class="fw-bold">@ViewBag.CompletedTasks/@ViewBag.TotalTasks</span>
+                        </div>
+                        <div class="progress mb-4" style="height: 10px;">
+                            @{
+                                var progress = ViewBag.TotalTasks > 0 ? (double)ViewBag.CompletedTasks / ViewBag.TotalTasks * 100 : 0;
+                            }
+                            <div class="progress-bar bg-success" role="progressbar" style="width: @progress.ToString("0")%" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <div class="p-2 border rounded bg-light d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Pending</span>
+                                <span class="badge bg-primary rounded-pill">@ViewBag.PendingTasks</span>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4" />
+                        
+                        <h5 class="fw-bold mb-3">Quick Add Task</h5>
+                        <div class="input-group">
+                            <input type="text" id="quickTaskContent" class="form-control" placeholder="What needs to be done?" />
+                            <button class="btn btn-primary" onclick="quickAddTask()">Add</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-    }
-    else
-    {
-            <div class="mb-5">
-                <a class="btn btn-primary btn-lg px-4" asp-controller="Notes" asp-action="Index">View My Notes</a>
+
+            <div class="col-12 col-lg-4">
+                <div class="card glass-panel h-100">
+                    <div class="card-body text-center">
+                        <h4 class="card-title fw-bold mb-4">Daily Step Tracker</h4>
+                        
+                        <div class="pedometer-wrapper mb-4">
+                            <div class="circular-progress" id="stepProgress">
+                                <div class="inner-circle">
+                                    <h2 class="mb-0 text-main fw-bold" id="stepCount">0</h2>
+                                    <small class="text-muted">/ <span id="stepGoal">10000</span> steps</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+                            <button class="btn btn-sm btn-outline-primary" onclick="addSteps(5000)">+5K</button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="addSteps(8000)">+8K</button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="addSteps(9000)">+9K</button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="addSteps(10000)">+10K</button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="addSteps(15000)">+15K</button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="addSteps(20000)">+20K</button>
+                        </div>
+                        
+                        <div class="input-group input-group-sm w-75 mx-auto">
+                            <input type="number" id="customSteps" class="form-control text-center" placeholder="Custom steps..." />
+                            <button class="btn btn-primary" onclick="addCustomSteps()">Add</button>
+                        </div>
+
+                        <div class="input-group input-group-sm w-75 mx-auto mt-3">
+                            <input type="number" id="dailyStepGoalInput" class="form-control text-center" placeholder="Set daily goal" min="1000" max="50000" />
+                            <button class="btn btn-outline-secondary" onclick="setDailyGoal()">Set</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h4 class="card-title fw-bold mb-4">Daily Motivation</h4>
+                        
+                        <h5 class="fw-bold mb-3">Daily Inspiration</h5>
+                        <blockquote class="blockquote border-start border-4 border-primary ps-3 bg-light p-3 rounded">
+                            <p class="mb-0 fs-6 text-dark italic">"Success is not final, failure is not fatal: it is the courage to continue that counts."</p>
+                        </blockquote>
+                        
+                        <div class="d-grid gap-3 mt-4">
+                            <a class="btn btn-outline-primary text-start" asp-controller="Notes" asp-action="Create">
+                                <i class="bi bi-plus-circle me-2"></i> New Detailed Task
+                            </a>
+                            <a class="btn btn-outline-secondary text-start" asp-controller="Notes" asp-action="Index">
+                                <i class="bi bi-list-task me-2"></i> View All Tasks
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Hydration Tracker</h5>
+                        <p class="text-muted small mb-2">Target: 8 glasses/day</p>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div id="waterProgressBar" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Water intake</span>
+                            <span class="fw-bold"><span id="waterCount">0</span>/8</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary flex-fill" onclick="addWater(1)">+1 glass</button>
+                            <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="resetWater()">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Workout Timer</h5>
+                        <p class="display-6 fw-bold mb-3" id="workoutTimerDisplay">00:00</p>
+                        <div class="d-flex gap-2 mb-3">
+                            <button class="btn btn-sm btn-primary flex-fill" onclick="startWorkoutTimer()">Start</button>
+                            <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="pauseWorkoutTimer()">Pause</button>
+                            <button class="btn btn-sm btn-outline-danger flex-fill" onclick="resetWorkoutTimer()">Reset</button>
+                        </div>
+                        <p class="text-muted small mb-0">Track active workout minutes and stay consistent.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Calories Burned Estimator</h5>
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">Weight (kg)</label>
+                            <input id="weightInput" type="number" class="form-control form-control-sm" value="70" min="30" max="250" />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">Minutes</label>
+                            <input id="minutesInput" type="number" class="form-control form-control-sm" value="30" min="1" max="300" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Intensity</label>
+                            <select id="intensityInput" class="form-select form-select-sm">
+                                <option value="4">Light</option>
+                                <option value="6" selected>Moderate</option>
+                                <option value="8">Intense</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-sm btn-primary w-100 mb-2" onclick="calculateCalories()">Calculate</button>
+                        <p class="mb-0 text-muted">Estimated burn: <span id="caloriesResult" class="fw-bold text-main">0 kcal</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-8">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Monthly Progress (Completed Tasks)</h5>
+                        <div style="height: 300px;">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Task Distribution</h5>
+                        <div style="height: 300px;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-8">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Weekly Steps Overview</h5>
+                        <div style="height: 280px;">
+                            <canvas id="weeklyStepsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Daily Habits</h5>
+                        <div id="habitList" class="d-grid gap-2">
+                            <label><input type="checkbox" data-habit="stretch" onchange="toggleHabit(this)" /> Stretch 10 min</label>
+                            <label><input type="checkbox" data-habit="protein" onchange="toggleHabit(this)" /> Protein meal</label>
+                            <label><input type="checkbox" data-habit="sleep" onchange="toggleHabit(this)" /> Sleep plan</label>
+                            <label><input type="checkbox" data-habit="walk" onchange="toggleHabit(this)" /> Evening walk</label>
+                        </div>
+                        <p class="text-muted small mt-3 mb-0">Completed today: <span id="habitScore">0/4</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                fetchTodaySteps();
+                renderProgressChart();
+                renderCategoryChart();
+                renderWeeklyStepsChart();
+                loadHydration();
+                loadHabits();
+            });
+
+            async function renderCategoryChart() {
+                try {
+                    const response = await fetch('/Notes/GetCategoryStats');
+                    if (response.ok) {
+                        const data = await response.json();
+                        const ctx = document.getElementById('categoryChart').getContext('2d');
+                        
+                        const colors = {
+                            'Work': '#2563eb',
+                            'Fitness': '#10b981',
+                            'Reading': '#0ea5e9',
+                            'Personal': '#f59e0b',
+                            'Health': '#14b8a6',
+                            'Challenge': '#ef4444',
+                            'General': '#64748b'
+                        };
+
+                        new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: data.map(d => d.category),
+                                datasets: [{
+                                    data: data.map(d => d.count),
+                                    backgroundColor: data.map(d => colors[d.category] || '#cbd5e1'),
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: { boxWidth: 12, padding: 15, color: '#64748b' }
+                                    }
+                                },
+                                cutout: '70%'
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching category stats:', error);
+                }
+            }
+
+            async function renderProgressChart() {
+                try {
+                    const response = await fetch('/Notes/GetMonthlyProgress');
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        const ctx = document.getElementById('progressChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.map(d => new Date(d.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })),
+                                datasets: [{
+                                    label: 'Completed Tasks',
+                                    data: data.map(d => d.count),
+                                    borderColor: '#2563eb',
+                                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                    fill: true,
+                                    tension: 0.4,
+                                    borderWidth: 3,
+                                    pointBackgroundColor: '#2563eb',
+                                    pointRadius: 4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: { stepSize: 1, color: '#64748b' },
+                                        grid: { color: 'rgba(0,0,0,0.05)' }
+                                    },
+                                    x: {
+                                        ticks: { color: '#64748b' },
+                                        grid: { display: false }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching progress chart:', error);
+                }
+            }
+
+            async function fetchTodaySteps() {
+                try {
+                    const response = await fetch('/api/pedometer/today');
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateDashboardUI(data.steps, data.goal, data.points, data.streak);
+                    }
+                } catch (error) {
+                    console.error('Error fetching steps:', error);
+                }
+            }
+
+            async function addSteps(steps) {
+                try {
+                    const response = await fetch('/api/pedometer/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ steps: steps })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateDashboardUI(data.steps, data.goal, data.points, data.streak);
+                    }
+                } catch (error) {
+                    console.error('Error adding steps:', error);
+                }
+            }
+
+            async function setDailyGoal() {
+                const input = document.getElementById('dailyStepGoalInput');
+                const goal = parseInt(input.value, 10);
+                if (isNaN(goal) || goal < 1000 || goal > 50000) return;
+
+                try {
+                    const response = await fetch('/api/pedometer/goal', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ goal: goal })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateDashboardUI(data.steps, data.goal);
+                    }
+                } catch (error) {
+                    console.error('Error setting goal:', error);
+                }
+            }
+
+            async function quickAddTask() {
+                const contentInput = document.getElementById('quickTaskContent');
+                const content = contentInput.value;
+                if (!content) return;
+
+                try {
+                    const response = await fetch('/Notes/QuickCreate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+                        },
+                        body: JSON.stringify({ content: content })
+                    });
+                    
+                    if (response.ok) {
+                        location.reload(); // Refresh to show new task in stats
+                    }
+                } catch (error) {
+                    console.error('Error creating task:', error);
+                }
+            }
+            
+            function addCustomSteps() {
+                const input = document.getElementById('customSteps');
+                const val = parseInt(input.value);
+                if (!isNaN(val) && val > 0) {
+                    addSteps(val);
+                    input.value = '';
+                }
+            }
+
+            function updateDashboardUI(steps, goal, points, streak) {
+                document.getElementById('stepCount').innerText = steps;
+                document.getElementById('stepGoal').innerText = goal;
+                
+                if (document.getElementById('userPoints')) {
+                    document.getElementById('userPoints').innerText = points;
+                }
+                if (document.getElementById('userStreak')) {
+                    document.getElementById('userStreak').innerText = streak;
+                }
+                
+                const percentage = Math.min((steps / goal) * 100, 100);
+                const progressElement = document.getElementById('stepProgress');
+                
+                progressElement.style.background = `conic-gradient(var(--accent) ${percentage}%, var(--card-border) 0deg)`;
+            }
+
+            async function renderWeeklyStepsChart() {
+                const canvas = document.getElementById('weeklyStepsChart');
+                if (!canvas) return;
+
+                try {
+                    const response = await fetch('/api/pedometer/weekly-summary');
+                    if (!response.ok) return;
+
+                    const data = await response.json();
+                    const labels = data.map(d => new Date(d.date).toLocaleDateString(undefined, { weekday: 'short' }));
+                    const steps = data.map(d => d.steps);
+                    const goals = data.map(d => d.goal);
+
+                    const ctx = canvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels,
+                            datasets: [
+                                {
+                                    label: 'Steps',
+                                    data: steps,
+                                    backgroundColor: 'rgba(79, 70, 229, 0.75)',
+                                    borderRadius: 8
+                                },
+                                {
+                                    label: 'Goal',
+                                    data: goals,
+                                    type: 'line',
+                                    borderColor: '#0ea5e9',
+                                    borderWidth: 2,
+                                    pointRadius: 0
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error loading weekly summary:', error);
+                }
+            }
+
+            function loadHydration() {
+                const key = `water-${new Date().toISOString().slice(0, 10)}`;
+                const value = parseInt(localStorage.getItem(key) || '0', 10);
+                updateWaterUI(value);
+            }
+
+            function addWater(glasses) {
+                const key = `water-${new Date().toISOString().slice(0, 10)}`;
+                const current = parseInt(localStorage.getItem(key) || '0', 10);
+                const next = Math.min(8, current + glasses);
+                localStorage.setItem(key, String(next));
+                updateWaterUI(next);
+            }
+
+            function resetWater() {
+                const key = `water-${new Date().toISOString().slice(0, 10)}`;
+                localStorage.setItem(key, '0');
+                updateWaterUI(0);
+            }
+
+            function updateWaterUI(glasses) {
+                const count = document.getElementById('waterCount');
+                const bar = document.getElementById('waterProgressBar');
+                if (!count || !bar) return;
+                count.textContent = String(glasses);
+                bar.style.width = `${(glasses / 8) * 100}%`;
+            }
+
+            let workoutTimerInterval = null;
+            let workoutSeconds = 0;
+
+            function startWorkoutTimer() {
+                if (workoutTimerInterval) return;
+                workoutTimerInterval = setInterval(() => {
+                    workoutSeconds += 1;
+                    renderTimer();
+                }, 1000);
+            }
+
+            function pauseWorkoutTimer() {
+                clearInterval(workoutTimerInterval);
+                workoutTimerInterval = null;
+            }
+
+            function resetWorkoutTimer() {
+                pauseWorkoutTimer();
+                workoutSeconds = 0;
+                renderTimer();
+            }
+
+            function renderTimer() {
+                const display = document.getElementById('workoutTimerDisplay');
+                if (!display) return;
+                const mins = String(Math.floor(workoutSeconds / 60)).padStart(2, '0');
+                const secs = String(workoutSeconds % 60).padStart(2, '0');
+                display.textContent = `${mins}:${secs}`;
+            }
+
+            function calculateCalories() {
+                const weight = parseFloat(document.getElementById('weightInput').value);
+                const minutes = parseFloat(document.getElementById('minutesInput').value);
+                const met = parseFloat(document.getElementById('intensityInput').value);
+                if (isNaN(weight) || isNaN(minutes) || isNaN(met)) return;
+
+                const kcal = (met * 3.5 * weight / 200) * minutes;
+                document.getElementById('caloriesResult').textContent = `${Math.round(kcal)} kcal`;
+            }
+
+            function loadHabits() {
+                const key = `habits-${new Date().toISOString().slice(0, 10)}`;
+                const saved = JSON.parse(localStorage.getItem(key) || '{}');
+                document.querySelectorAll('#habitList input[type="checkbox"]').forEach(cb => {
+                    cb.checked = !!saved[cb.dataset.habit];
+                });
+                updateHabitScore();
+            }
+
+            function toggleHabit(checkbox) {
+                const key = `habits-${new Date().toISOString().slice(0, 10)}`;
+                const saved = JSON.parse(localStorage.getItem(key) || '{}');
+                saved[checkbox.dataset.habit] = checkbox.checked;
+                localStorage.setItem(key, JSON.stringify(saved));
+                updateHabitScore();
+            }
+
+            function updateHabitScore() {
+                const total = document.querySelectorAll('#habitList input[type="checkbox"]').length;
+                const completed = document.querySelectorAll('#habitList input[type="checkbox"]:checked').length;
+                document.getElementById('habitScore').textContent = `${completed}/${total}`;
+            }
+        </script>
     }
-</div>
+}

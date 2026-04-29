@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TODOlistsystem.Data;
 
@@ -10,9 +11,11 @@ using TODOlistsystem.Data;
 namespace TODOlistsystem.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429122825_AddTaskTypesAndPedometer")]
+    partial class AddTaskTypesAndPedometer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.23");
@@ -164,9 +167,6 @@ namespace TODOlistsystem.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("CurrentStreak")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
@@ -176,9 +176,6 @@ namespace TODOlistsystem.Data.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("LastActiveDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
@@ -206,9 +203,6 @@ namespace TODOlistsystem.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Points")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SecurityStamp")
@@ -286,9 +280,6 @@ namespace TODOlistsystem.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Priority")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SharedWithUserId")

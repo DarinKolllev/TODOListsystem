@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +58,7 @@ namespace TODOlistsystem.Controllers
         // POST: Notes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Content,DueDate")] Note note)
+        public async Task<IActionResult> Create([Bind("Content,DueDate,Type")] Note note)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -106,7 +106,7 @@ namespace TODOlistsystem.Controllers
         // POST: Notes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Content,IsCompleted,DueDate")] Note note)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Content,IsCompleted,DueDate,Type")] Note note)
         {
             if (id != note.Id)
             {
@@ -120,8 +120,19 @@ namespace TODOlistsystem.Controllers
             }
 
             existingNote.Content = note.Content;
+            
+            if (!existingNote.IsCompleted && note.IsCompleted)
+            {
+                var user = await _context.Users.FindAsync(existingNote.UserId);
+                if (user != null)
+                {
+                    user.Points += 10;
+                }
+            }
+            
             existingNote.IsCompleted = note.IsCompleted;
             existingNote.DueDate = note.DueDate;
+            existingNote.Type = note.Type;
             existingNote.UpdatedAt = DateTime.UtcNow;
 
             try
@@ -175,6 +186,85 @@ namespace TODOlistsystem.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleComplete(Guid id)
+        {
+            var note = await _context.Notes.FindAsync(id);
+            if (note == null) return NotFound();
+
+            bool wasCompleted = note.IsCompleted;
+            note.IsCompleted = !note.IsCompleted;
+            note.UpdatedAt = DateTime.UtcNow;
+
+            if (!wasCompleted && note.IsCompleted)
+            {
+                var user = await _context.Users.FindAsync(note.UserId);
+                if (user != null) user.Points += 10;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { isCompleted = note.IsCompleted });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> QuickCreate([FromBody] QuickCreateRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Content)) return BadRequest();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var note = new Note
+            {
+                Content = request.Content,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+                Type = TaskType.General,
+                Priority = TaskPriority.Medium
+            };
+
+            _context.Notes.Add(note);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { id = note.Id, content = note.Content, type = note.Type.ToString(), priority = note.Priority.ToString() });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCategoryStats()
+        {
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var stats = await _context.Notes
+                .Where(n => n.UserId == userId && !n.IsDeleted)
+                .GroupBy(n => n.Type)
+                .Select(g => new { category = g.Key.ToString(), count = g.Count() })
+                .ToListAsync();
+
+            return Ok(stats);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMonthlyProgress()
+        {
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var now = DateTime.UtcNow;
+            var startOfMonth = new DateTime(now.Year, now.Month, 1);
+            
+            var completedTasks = await _context.Notes
+                .Where(n => n.UserId == userId && n.IsCompleted && n.UpdatedAt >= startOfMonth)
+                .GroupBy(n => n.UpdatedAt.Value.Date)
+                .Select(g => new { date = g.Key.ToString("yyyy-MM-dd"), count = g.Count() })
+                .OrderBy(g => g.date)
+                .ToListAsync();
+
+            return Ok(completedTasks);
+        }
+
+        public class QuickCreateRequest { public string Content { get; set; } }
 
         private bool NoteExists(Guid id)
         {
