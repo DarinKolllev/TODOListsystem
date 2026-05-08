@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TODOlistsystem.Models;
 
 namespace TODOlistsystem.Controllers
@@ -9,7 +11,9 @@ namespace TODOlistsystem.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly Data.ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger, Data.ApplicationDbContext context)
+        public HomeController(
+            ILogger<HomeController> logger,
+            Data.ApplicationDbContext context)
         {
             _logger = logger;
             _context = context;
@@ -17,19 +21,27 @@ namespace TODOlistsystem.Controllers
 
         public async Task<IActionResult> Index()
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated == true)
             {
-                var userId = System.Security.Claims.ClaimTypes.NameIdentifier;
-                var currentUserId = User.FindFirst(userId)?.Value;
-                
-                if (currentUserId != null)
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!string.IsNullOrWhiteSpace(currentUserId))
                 {
-                    var tasks = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(_context.Notes.Where(n => n.UserId == currentUserId && !n.IsDeleted));
-                    ViewBag.TotalTasks = tasks.Count;
-                    ViewBag.CompletedTasks = tasks.Count(t => t.IsCompleted);
-                    ViewBag.PendingTasks = tasks.Count(t => !t.IsCompleted);
+                    var baseQuery = _context.Notes
+                        .AsNoTracking()
+                        .Where(n => n.UserId == currentUserId && !n.IsDeleted);
+
+                    var totalTasks = await baseQuery.CountAsync();
+
+                    var completedTasks = await baseQuery
+                        .CountAsync(n => n.IsCompleted);
+
+                    ViewBag.TotalTasks = totalTasks;
+                    ViewBag.CompletedTasks = completedTasks;
+                    ViewBag.PendingTasks = totalTasks - completedTasks;
                 }
             }
+
             return View();
         }
 
@@ -38,10 +50,16 @@ namespace TODOlistsystem.Controllers
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [ResponseCache(
+            Duration = 0,
+            Location = ResponseCacheLocation.None,
+            NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            });
         }
     }
 }
