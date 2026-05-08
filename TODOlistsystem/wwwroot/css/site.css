@@ -296,18 +296,122 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 @media (max-width: 767.98px) {
-  .app-main-container {
-    margin-top: 1rem;
-    padding-top: 0.5rem;
-  }
+    .app-main-container {
+        margin-top: 1rem;
+        padding-top: 0.5rem;
+    }
 
-  .card-body {
-    padding: 1rem;
-  }
+    .card-body {
+        padding: 1rem;
+    }
 
-  .tasks-toolbar-control,
-  .tasks-toolbar-filter {
-    max-width: 100%;
-    width: 100%;
-  }
-}
+    .tasks-toolbar-control,
+    .tasks-toolbar-filter {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #f8fafc;
+        color: #111827;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    
+    .bg-decoration {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at top left, rgba(0,0,0,0.04), transparent 35%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    
+    .app-navbar {
+        backdrop-filter: blur(14px);
+        background: rgba(255,255,255,0.75);
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        padding: 1rem 0;
+    }
+
+    
+    .app-brand {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        color: #111827 !important;
+    }
+
+    .brand-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #111827;
+    }
+
+    .app-nav-links .nav-link {
+        position: relative;
+        font-weight: 500;
+        color: #4b5563 !important;
+        transition: .2s ease;
+        padding: .5rem 1rem !important;
+    }
+
+        .app-nav-links .nav-link:hover {
+            color: #111827 !important;
+        }
+
+        .app-nav-links .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background: #111827;
+            transition: .25s ease;
+        }
+
+        .app-nav-links .nav-link:hover::after {
+            width: calc(100% - 2rem);
+        }
+
+    
+    .app-main-container {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
+    .app-content {
+        background: rgba(255,255,255,0.7);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 24px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    }
+
+    
+    .theme-toggle-btn {
+        border-radius: 999px;
+        padding: .45rem 1rem;
+        border: 1px solid rgba(0,0,0,0.08);
+        background: white;
+        transition: .2s ease;
+    }
+
+        .theme-toggle-btn:hover {
+            transform: translateY(-1px);
+        }
+
+    
+    .app-footer {
+        padding: 2rem 0;
+        color: #6b7280;
+    }

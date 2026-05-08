@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="bg" data-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,33 +7,49 @@
     <base href="~/" />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TODOlistsystem.styles.css" asp-append-version="true" />
 </head>
 
 <body class="app-body">
+
+    <!-- Background blur -->
+    <div class="bg-decoration"></div>
+
     <header>
         <nav class="navbar navbar-expand-lg sticky-top app-navbar">
             <div class="container">
-                <a class="navbar-brand fw-bold app-brand" asp-controller="Home" asp-action="Index">
+
+                <!-- Logo -->
+                <a class="navbar-brand app-brand" asp-controller="Home" asp-action="Index">
+                    <span class="brand-dot"></span>
                     TaskFlow
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <!-- Mobile toggle -->
+                <button class="navbar-toggler border-0 shadow-none"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarMain">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarMain">
 
-                    <ul class="navbar-nav me-auto app-nav-links">
+                    <!-- Navigation -->
+                    <ul class="navbar-nav mx-auto app-nav-links">
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">
                                 Dashboard
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Notes" asp-action="Index">
                                 Tasks
@@ -41,30 +57,40 @@
                         </li>
                     </ul>
 
-                    <div class="d-flex align-items-center gap-2 ms-auto">
-                        <button type="button" id="themeToggle" class="btn btn-sm btn-outline-secondary theme-toggle-btn" aria-label="Toggle theme">
+                    <!-- Right controls -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        <button type="button"
+                                id="themeToggle"
+                                class="btn btn-sm theme-toggle-btn"
+                                aria-label="Toggle theme">
                             Dark mode
                         </button>
-                        <partial name="_LoginPartial" />
-                    </div>
 
+                        <partial name="_LoginPartial" />
+
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
 
+    <!-- Main -->
     <div class="container app-main-container">
-        <main role="main">
+        <main role="main" class="app-content">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="footer app-footer text-muted mt-5">
-        <div class="container text-center py-3">
-            &copy; 2026 - TaskFlow. Stay focused, ship daily.
+    <!-- Footer -->
+    <footer class="footer app-footer">
+        <div class="container text-center">
+            <p class="mb-1 fw-semibold">TaskFlow</p>
+            <small>Stay focused, ship daily.</small>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
