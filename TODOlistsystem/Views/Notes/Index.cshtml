@@ -126,5 +126,30 @@
                 checkbox.checked = !checkbox.checked;
             }
         }
+            function updateDashboardUI(steps, goal, points, streak) {
+        document.getElementById('stepCount').innerText = steps;
+        document.getElementById('stepGoal').innerText = goal;
+
+        if (document.getElementById('userPoints')) {
+            document.getElementById('userPoints').innerText = points;
+        }
+        if (document.getElementById('userStreak')) {
+            document.getElementById('userStreak').innerText = streak;
+        }
+
+        const percentage = Math.min((steps / goal) * 100, 100);
+        const progressElement = document.getElementById('stepProgress');
+        progressElement.style.background = `conic-gradient(var(--accent) ${percentage}%, var(--card-border) 0deg)`;
+
+        // Disable add buttons if goal reached
+        const goalReached = steps >= goal;
+        document.querySelectorAll('.btn-outline-primary[onclick^="addSteps"]').forEach(btn => {
+            btn.disabled = goalReached;
+            if (goalReached) {
+                btn.classList.add('disabled');
+            }
+        });
+        document.getElementById('customSteps').disabled = goalReached;
+    }
     </script>
 }

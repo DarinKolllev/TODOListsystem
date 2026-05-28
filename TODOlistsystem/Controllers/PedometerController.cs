@@ -90,30 +90,35 @@ namespace TODOlistsystem.Controllers
                 {
                     UserId = userId,
                     Date = today,
-                    StepCount = request.Steps,
+                    StepCount = Math.Min(request.Steps, 10000), // Cap at default goal
                     Goal = 10000
                 };
                 _context.StepLogs.Add(stepLog);
             }
             else
             {
-                stepLog.StepCount += request.Steps;
+                // Cap steps at the goal - don't allow exceeding
+                var newStepCount = stepLog.StepCount + request.Steps;
+                stepLog.StepCount = Math.Min(newStepCount, stepLog.Goal);
             }
 
+            // Only award points if not already at goal
             var user = await _context.Users.FindAsync(userId);
-            if (user != null)
+            if (user != null && stepLog.StepCount < stepLog.Goal)
             {
                 // Simple gamification: 1 point per 1,000 steps logged.
                 user.Points += Math.Max(1, request.Steps / 1000);
             }
 
             await _context.SaveChangesAsync();
+
             return Ok(new
             {
                 steps = stepLog.StepCount,
                 goal = stepLog.Goal,
                 points = user?.Points ?? 0,
-                streak = user?.CurrentStreak ?? 0
+                streak = user?.CurrentStreak ?? 0,
+                goalReached = stepLog.StepCount >= stepLog.Goal  // Optional: notify frontend
             });
         }
 

@@ -16,23 +16,46 @@ public class NotesController : Controller
     public NotesController(ApplicationDbContext context) => _context = context;
 
     // GET: Notes
-    public async Task<IActionResult> Index() =>
-        View(await _context.Notes
-            .AsNoTracking()
-            .Include(n => n.User)
-            .Where(n => !n.IsDeleted)
-            .ToListAsync());
+    public async Task<IActionResult> Index() 
+   {
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var isAdmin = User.IsInRole("Admin");
+
+    var query = _context.Notes
+        .AsNoTracking()
+        .Include(n => n.User)
+        .Where(n => !n.IsDeleted);
+
+    // If not admin, only show user's own notes
+    if (!isAdmin)
+    {
+        query = query.Where(n => n.UserId == userId);
+    }
+
+    return View(await query.ToListAsync());
+}
 
     // GET: Notes/Details/5
     public async Task<IActionResult> Details(Guid id)
     {
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
         var note = await _context.Notes
             .AsNoTracking()
             .Include(n => n.User)
             .FirstOrDefaultAsync(n => n.Id == id);
 
-        return note == null ? NotFound() : View(note);
+        if (note == null) return NotFound();
+
+        // Check ownership
+        if (!isAdmin && note.UserId != userId)
+            return Forbid();
+
+        return View(note);
     }
+
 
     // GET: Notes/Create
     public IActionResult Create()
@@ -102,9 +125,19 @@ public class NotesController : Controller
     // GET: Notes/Edit/5
     public async Task<IActionResult> Edit(Guid id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
         var note = await _context.Notes.FindAsync(id);
-        return note == null ? NotFound() : View(note);
+
+        if (note == null) return NotFound();
+
+        if (!isAdmin && note.UserId != userId)
+            return Forbid();
+
+        return View(note);
     }
+
 
     // POST: Notes/Edit/5
     [HttpPost]
@@ -138,12 +171,20 @@ public class NotesController : Controller
     // GET: Notes/Delete/5
     public async Task<IActionResult> Delete(Guid id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
         var note = await _context.Notes
             .AsNoTracking()
             .Include(n => n.User)
             .FirstOrDefaultAsync(n => n.Id == id);
 
-        return note == null ? NotFound() : View(note);
+        if (note == null) return NotFound();
+
+        if (!isAdmin && note.UserId != userId)
+            return Forbid();
+
+        return View(note);
     }
 
     // POST: Notes/Delete/5
