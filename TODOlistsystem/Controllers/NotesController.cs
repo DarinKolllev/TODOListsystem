@@ -40,7 +40,7 @@ public class NotesController : Controller
     // POST: Notes/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Content,DueDate,Type")] Note note)
+    public async Task<IActionResult> Create([Bind("Content,DueDate,Type,Priority")] Note note)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
@@ -67,7 +67,7 @@ public class NotesController : Controller
     // POST: Notes/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, [Bind("Id,Content,IsCompleted,DueDate,Type")] Note model)
+    public async Task<IActionResult> Edit(Guid id, [Bind("Id,Content,IsCompleted,DueDate,Type,Priority")] Note model)
     {
         if (id != model.Id) return NotFound();
 
@@ -80,6 +80,7 @@ public class NotesController : Controller
         note.IsCompleted = model.IsCompleted;
         note.DueDate = model.DueDate;
         note.Type = model.Type;
+        note.Priority = model.Priority;
         note.UpdatedAt = DateTime.UtcNow;
 
         if (completedNow)
@@ -156,6 +157,8 @@ public class NotesController : Controller
         var note = new Note
         {
             Content = request.Content,
+            Type = request.Type,
+            Priority = request.Priority,
             UserId = userId,
             CreatedAt = DateTime.UtcNow
         };
@@ -166,7 +169,10 @@ public class NotesController : Controller
         return Ok(new
         {
             note.Id,
-            note.Content
+            note.Content,
+            Type = note.Type.ToString(),
+            Priority = note.Priority.ToString(),
+            FormattedDueDate = note.DueDate?.ToString("MMM dd, yyyy HH:mm") ?? ""
         });
     }
 
@@ -219,5 +225,7 @@ public class NotesController : Controller
     public class QuickCreateRequest
     {
         public string Content { get; set; } = string.Empty;
+        public TaskType Type { get; set; } = TaskType.General;
+        public TaskPriority Priority { get; set; } = TaskPriority.Medium;
     }
 }

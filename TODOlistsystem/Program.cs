@@ -23,6 +23,19 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// External Authentication (Google & Microsoft)
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "MOCK_GOOGLE_CLIENT_ID";
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "MOCK_GOOGLE_CLIENT_SECRET";
+    })
+    .AddMicrosoftAccount(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"] ?? "MOCK_MICROSOFT_CLIENT_ID";
+        options.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"] ?? "MOCK_MICROSOFT_CLIENT_SECRET";
+    });
+
 // MVC Only
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); 
 builder.Services.AddRazorPages();

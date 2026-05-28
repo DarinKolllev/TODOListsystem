@@ -1,103 +1,182 @@
-@model IEnumerable<Note>
+@model IEnumerable<TODOlistsystem.Models.Note>
+@using TODOlistsystem.Models
 
 @{
     ViewData["Title"] = "My Tasks";
 }
 
 <section class="tasks-shell">
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-    <div>
-        <p class="text-muted mb-1">Your productivity board</p>
-        <h1 class="mb-0">My Tasks</h1>
-    </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <div class="input-group input-group-sm tasks-toolbar-control">
-            <input type="text" id="taskSearch" class="form-control" placeholder="Search tasks..." onkeyup="filterTasks()">
-            <span class="input-group-text">Search</span>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <p class="text-muted mb-1">Your productivity board</p>
+            <h1 class="mb-0">My Tasks</h1>
         </div>
-        <select id="typeFilter" class="form-select form-select-sm tasks-toolbar-filter" onchange="filterTasks()">
-            <option value="all">All Types</option>
-            @foreach (var type in Enum.GetValues(typeof(TODOlistsystem.Models.TaskType)))
-            {
-                <option value="@type">@type</option>
-            }
-        </select>
-        <a asp-action="Create" class="btn btn-primary">+ Create Task</a>
+        <div>
+            <a asp-action="Create" class="btn btn-primary shadow-sm">+ Detailed Task</a>
+        </div>
     </div>
-</div>
 
-<div class="row g-4" id="taskGrid">
-    @foreach (var item in Model)
-    {
-        <div class="col-12 col-md-6 col-lg-4 task-card" data-content="@item.Content.ToLower()" data-type="@item.Type">
-            <div class="card glass-panel task-card-surface h-100 @(item.IsCompleted ? "border-success opacity-75" : "")">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div class="d-flex flex-wrap gap-1">
-                            @{
-                                var badgeClass = item.Type switch
-                                {
-                                    TODOlistsystem.Models.TaskType.Work => "bg-primary",
-                                    TODOlistsystem.Models.TaskType.Fitness => "bg-success",
-                                    TODOlistsystem.Models.TaskType.Reading => "bg-info text-dark",
-                                    TODOlistsystem.Models.TaskType.Personal => "bg-warning text-dark",
-                                    TODOlistsystem.Models.TaskType.Health => "bg-teal",
-                                    TODOlistsystem.Models.TaskType.Challenge => "bg-danger",
-                                    _ => "bg-secondary"
-                                };
-                            }
-                            <span class="badge @badgeClass">
-                                @item.Type
-                            </span>
-                            <span class="badge @(item.Priority == TODOlistsystem.Models.TaskPriority.Urgent ? "bg-danger" : (item.Priority == TODOlistsystem.Models.TaskPriority.High ? "bg-warning text-dark" : "bg-light text-dark"))">
-                                @item.Priority
-                            </span>
-                        </div>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" @(item.IsCompleted ? "checked" : "") onchange="toggleTask('@item.Id', this)">
-                        </div>
-                    </div>
-                    
-                    <h5 class="card-title text-main @(item.IsCompleted ? "text-decoration-line-through text-muted" : "")">@Html.DisplayFor(modelItem => item.Content)</h5>
-                    
-                    <div class="mt-auto pt-3">
-                        @if(item.DueDate.HasValue)
-                        {
-                            <p class="card-text text-muted small mb-3">
-                                <i class="bi bi-calendar-event"></i> Due: @item.DueDate.Value.ToString("MMM dd, yyyy HH:mm")
-                            </p>
-                        }
-                        
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="btn-group">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+    <!-- Inline Quick Add Task Panel -->
+    <div class="glass-panel index-quick-add-card mb-4">
+        <form id="quickAddForm" onsubmit="submitQuickAdd(event)" class="index-quick-add-form">
+            <input type="text" id="quickAddContent" class="form-control index-quick-add-input" placeholder="Type a task and hit enter..." required />
+            
+            <div class="d-flex gap-2">
+                <select id="quickAddType" class="form-select index-quick-add-select" title="Category">
+                    @foreach (var type in Enum.GetValues(typeof(TaskType)))
+                    {
+                        <option value="@((int)type)">@type</option>
+                    }
+                </select>
+
+                <select id="quickAddPriority" class="form-select index-quick-add-select" title="Priority">
+                    @foreach (var priority in Enum.GetValues(typeof(TaskPriority)))
+                    {
+                        <option value="@((int)priority)" selected="@(priority.ToString() == "Medium" ? "selected" : null)">@priority</option>
+                    }
+                </select>
+                
+                <button type="submit" class="btn btn-primary px-4">+ Add</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Live Filters Toolbar -->
+    <div class="glass-panel p-3 mb-4">
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <div class="input-group input-group-sm">
+                    <input type="text" id="taskSearch" class="form-control" placeholder="Search task descriptions..." onkeyup="filterTasks()">
+                    <span class="input-group-text bg-white border-start-0 text-muted"><i class="bi bi-search"></i></span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <select id="typeFilter" class="form-select form-select-sm" onchange="filterTasks()">
+                    <option value="all">All Categories</option>
+                    @foreach (var type in Enum.GetValues(typeof(TaskType)))
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select id="priorityFilter" class="form-select form-select-sm" onchange="filterTasks()">
+                    <option value="all">All Priorities</option>
+                    @foreach (var priority in Enum.GetValues(typeof(TaskPriority)))
+                    {
+                        <option value="@priority">@priority</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-2">
+                <select id="statusFilter" class="form-select form-select-sm" onchange="filterTasks()">
+                    <option value="all">All States</option>
+                    <option value="pending" selected>Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Cards Grid -->
+    <div class="row g-4" id="taskGrid">
+        @foreach (var item in Model)
+        {
+            <div class="col-12 col-md-6 col-lg-4 task-card" 
+                 id="card-@item.Id"
+                 data-content="@item.Content.ToLower()" 
+                 data-type="@item.Type"
+                 data-priority="@item.Priority"
+                 data-status="@(item.IsCompleted ? "completed" : "pending")">
+                
+                <div class="card glass-panel task-card-surface h-100 @(item.IsCompleted ? "task-completed-card" : "")">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex flex-wrap gap-1">
+                                @{
+                                    var badgeClass = item.Type switch
+                                    {
+                                        TaskType.Work => "bg-primary",
+                                        TaskType.Fitness => "bg-success",
+                                        TaskType.Reading => "bg-info text-dark",
+                                        TaskType.Personal => "bg-warning text-dark",
+                                        TaskType.Health => "bg-teal",
+                                        TaskType.Challenge => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                    
+                                    var priorityBadgeClass = item.Priority switch
+                                    {
+                                        TaskPriority.Low => "badge-priority-low",
+                                        TaskPriority.Medium => "badge-priority-medium",
+                                        TaskPriority.High => "badge-priority-high",
+                                        TaskPriority.Urgent => "badge-priority-urgent",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @badgeClass category-badge">@item.Type</span>
+                                <span class="badge @priorityBadgeClass priority-badge">@item.Priority</span>
                             </div>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" @(item.IsCompleted ? "checked" : "") onchange="toggleTask('@item.Id', this)">
+                            </div>
+                        </div>
+                        
+                        <h5 class="card-title text-main mt-2 mb-3 task-title @(item.IsCompleted ? "text-decoration-line-through text-muted" : "")">
+                            @item.Content
+                        </h5>
+                        
+                        <div class="mt-auto pt-3 border-top border-light-subtle">
+                            @if (item.DueDate.HasValue)
+                            {
+                                <p class="card-text text-muted small mb-3">
+                                    📅 Due: @item.DueDate.Value.ToString("MMM dd, yyyy HH:mm")
+                                </p>
+                            }
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" style="border-top-right-radius:0; border-bottom-right-radius:0;">Edit</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" style="border-top-left-radius:0; border-bottom-left-radius:0;">Details</a>
+                                </div>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
 </section>
 
 @section Scripts {
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply initial filtering based on selected filters (default to pending)
+            filterTasks();
+        });
+
         function filterTasks() {
             const search = document.getElementById('taskSearch').value.toLowerCase();
             const type = document.getElementById('typeFilter').value;
+            const priority = document.getElementById('priorityFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            
             const cards = document.querySelectorAll('.task-card');
             
             cards.forEach(card => {
                 const content = card.getAttribute('data-content');
                 const cardType = card.getAttribute('data-type');
+                const cardPriority = card.getAttribute('data-priority');
+                const cardStatus = card.getAttribute('data-status');
                 
                 const matchesSearch = content.includes(search);
                 const matchesType = type === 'all' || cardType === type;
+                const matchesPriority = priority === 'all' || cardPriority === priority;
+                const matchesStatus = status === 'all' || cardStatus === status;
                 
-                if (matchesSearch && matchesType) {
+                if (matchesSearch && matchesType && matchesPriority && matchesStatus) {
                     card.style.display = '';
                 } else {
                     card.style.display = 'none';
@@ -106,7 +185,31 @@
         }
 
         async function toggleTask(id, checkbox) {
+            const card = document.getElementById(`card-${id}`);
+            const cardSurface = card.querySelector('.task-card-surface');
+            const title = card.querySelector('.task-title');
+            const isChecking = checkbox.checked;
+
             try {
+                // Instantly apply visual styling locally for seamless feel
+                if (isChecking) {
+                    cardSurface.classList.add('task-completed-card');
+                    title.classList.add('text-decoration-line-through', 'text-muted');
+                    card.setAttribute('data-status', 'completed');
+                    
+                    // Trigger a micro-confetti explosion!
+                    celebrateCompletion(checkbox);
+                } else {
+                    cardSurface.classList.remove('task-completed-card');
+                    title.classList.remove('text-decoration-line-through', 'text-muted');
+                    card.setAttribute('data-status', 'pending');
+                }
+
+                // Smoothly filter out if the status filter doesn't match anymore
+                setTimeout(() => {
+                    filterTasks();
+                }, 350);
+
                 const response = await fetch(`/Notes/ToggleComplete/${id}`, {
                     method: 'POST',
                     headers: {
@@ -114,16 +217,179 @@
                     }
                 });
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    checkbox.checked = data.isCompleted;
-                    location.reload(); // Simple way to update UI classes and Points
-                } else {
-                    checkbox.checked = !checkbox.checked; // Revert on error
+                if (!response.ok) {
+                    // Revert if request fails
+                    checkbox.checked = !isChecking;
+                    if (isChecking) {
+                        cardSurface.classList.remove('task-completed-card');
+                        title.classList.remove('text-decoration-line-through', 'text-muted');
+                        card.setAttribute('data-status', 'pending');
+                    } else {
+                        cardSurface.classList.add('task-completed-card');
+                        title.classList.add('text-decoration-line-through', 'text-muted');
+                        card.setAttribute('data-status', 'completed');
+                    }
+                    filterTasks();
                 }
             } catch (error) {
                 console.error('Error toggling task:', error);
-                checkbox.checked = !checkbox.checked;
+                checkbox.checked = !isChecking;
+                filterTasks();
+            }
+        }
+
+        async function submitQuickAdd(event) {
+            event.preventDefault();
+            
+            const input = document.getElementById('quickAddContent');
+            const typeSelect = document.getElementById('quickAddType');
+            const prioritySelect = document.getElementById('quickAddPriority');
+            
+            const content = input.value.trim();
+            const type = parseInt(typeSelect.value, 10);
+            const priority = parseInt(prioritySelect.value, 10);
+            
+            if (!content) return;
+
+            try {
+                const response = await fetch('/Notes/QuickCreate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+                    },
+                    body: JSON.stringify({ 
+                        content: content,
+                        type: type,
+                        priority: priority
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Render the new card dynamically
+                    appendTaskCard(data);
+                    
+                    // Reset input
+                    input.value = '';
+                    input.focus();
+                    
+                    // Refresh filters to make sure it respects status/priority options
+                    filterTasks();
+                }
+            } catch (error) {
+                console.error('Error adding quick task:', error);
+            }
+        }
+
+        function appendTaskCard(task) {
+            const grid = document.getElementById('taskGrid');
+            const col = document.createElement('div');
+            col.className = 'col-12 col-md-6 col-lg-4 task-card';
+            col.id = `card-${task.id}`;
+            col.setAttribute('data-content', task.content.toLowerCase());
+            col.setAttribute('data-type', task.type);
+            col.setAttribute('data-priority', task.priority);
+            col.setAttribute('data-status', 'pending');
+
+            // Category badge styling class
+            const badgeClasses = {
+                'Work': 'bg-primary',
+                'Fitness': 'bg-success',
+                'Reading': 'bg-info text-dark',
+                'Personal': 'bg-warning text-dark',
+                'Health': 'bg-teal',
+                'Challenge': 'bg-danger'
+            };
+            const badgeClass = badgeClasses[task.type] || 'bg-secondary';
+
+            // Priority badge styling class
+            const priorityClasses = {
+                'Low': 'badge-priority-low',
+                'Medium': 'badge-priority-medium',
+                'High': 'badge-priority-high',
+                'Urgent': 'badge-priority-urgent'
+            };
+            const priorityClass = priorityClasses[task.priority] || 'bg-secondary';
+
+            col.innerHTML = `
+                <div class="card glass-panel task-card-surface h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex flex-wrap gap-1">
+                                <span class="badge ${badgeClass} category-badge">${task.type}</span>
+                                <span class="badge ${priorityClass} priority-badge">${task.priority}</span>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" onchange="toggleTask('${task.id}', this)">
+                            </div>
+                        </div>
+                        
+                        <h5 class="card-title text-main mt-2 mb-3 task-title">
+                            ${task.content}
+                        </h5>
+                        
+                        <div class="mt-auto pt-3 border-top border-light-subtle">
+                            ${task.formattedDueDate ? `<p class="card-text text-muted small mb-3">📅 Due: ${task.formattedDueDate}</p>` : ''}
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <a href="/Notes/Edit/${task.id}" class="btn btn-sm btn-outline-secondary" style="border-top-right-radius:0; border-bottom-right-radius:0;">Edit</a>
+                                    <a href="/Notes/Details/${task.id}" class="btn btn-sm btn-outline-secondary" style="border-top-left-radius:0; border-bottom-left-radius:0;">Details</a>
+                                </div>
+                                <a href="/Notes/Delete/${task.id}" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Prepend so new tasks appear first
+            grid.insertBefore(col, grid.firstChild);
+        }
+
+        // celebrative confetti burst micro-interaction
+        function celebrateCompletion(element) {
+            const rect = element.getBoundingClientRect();
+            const count = 20;
+            const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9'];
+
+            for (let i = 0; i < count; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti-piece';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.left = `${rect.left + rect.width / 2}px`;
+                conf.style.top = `${rect.top + rect.height / 2}px`;
+
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 5;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed - 2; // push up
+
+                document.body.appendChild(conf);
+
+                let x = rect.left + rect.width / 2;
+                let y = rect.top + rect.height / 2;
+                let opacity = 1;
+
+                const animate = () => {
+                    x += vx;
+                    y += vy + 0.2; // gravity
+                    opacity -= 0.02;
+
+                    conf.style.left = `${x}px`;
+                    conf.style.top = `${y}px`;
+                    conf.style.opacity = opacity;
+
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        conf.remove();
+                    }
+                };
+
+                requestAnimationFrame(animate);
             }
         }
     </script>

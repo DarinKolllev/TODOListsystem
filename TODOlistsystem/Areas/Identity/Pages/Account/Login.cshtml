@@ -1,15 +1,15 @@
 @page
-@model RegisterModel
+@model LoginModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Log in";
 }
 
 <div class="auth-container">
     <div class="glass-panel auth-card">
         
         <div class="auth-header">
-            <h1 class="auth-title">Create Account</h1>
-            <p class="auth-subtitle">Join TaskFlow and supercharge your daily productivity</p>
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Log in to manage your tasks and daily habits</p>
         </div>
 
         <section>
@@ -21,31 +21,31 @@
                         {
                             @if (provider.Name.Equals("Google", StringComparison.OrdinalIgnoreCase))
                             {
-                                <button type="submit" class="social-btn google-btn" name="provider" value="@provider.Name" title="Register using your Google account">
+                                <button type="submit" class="social-btn google-btn" name="provider" value="@provider.Name" title="Log in using your Google account">
                                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
                                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
                                     </svg>
-                                    <span>Sign up with Google</span>
+                                    <span>Continue with Google</span>
                                 </button>
                             }
                             else if (provider.Name.Equals("Microsoft", StringComparison.OrdinalIgnoreCase))
                             {
-                                <button type="submit" class="social-btn microsoft-btn" name="provider" value="@provider.Name" title="Register using your Microsoft account">
+                                <button type="submit" class="social-btn microsoft-btn" name="provider" value="@provider.Name" title="Log in using your Microsoft account">
                                     <svg viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
                                         <path fill="#f35022" d="M0 0h11v11H0z"/>
                                         <path fill="#7fbb00" d="M12 0h11v11H12z"/>
                                         <path fill="#00a1f1" d="M0 12h11v11H0z"/>
                                         <path fill="#ffb900" d="M12 12h11v11H12z"/>
                                     </svg>
-                                    <span>Sign up with Microsoft</span>
+                                    <span>Continue with Microsoft</span>
                                 </button>
                             }
                             else
                             {
-                                <button type="submit" class="btn btn-outline-secondary w-100 mb-2" name="provider" value="@provider.Name" title="Register using your @provider.DisplayName account">
+                                <button type="submit" class="btn btn-outline-secondary w-100 mb-2" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
                                     @provider.DisplayName
                                 </button>
                             }
@@ -57,49 +57,35 @@
             }
         </section>
 
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="auth-form">
+        <form id="account" method="post" class="auth-form">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="form-floating">
-                        <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="First Name" />
-                        <label asp-for="Input.FirstName">First Name</label>
-                        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="form-floating">
-                        <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Last Name" />
-                        <label asp-for="Input.LastName">Last Name</label>
-                        <span asp-validation-for="Input.LastName" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
 
             <div class="form-floating mb-3">
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email Address</label>
+                <label asp-for="Input.Email" class="form-label">Email Address</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
 
             <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Password" />
-                <label asp-for="Input.Password">Password</label>
+                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                <label asp-for="Input.Password" class="form-label">Password</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Confirm Password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            <div class="checkbox mb-3 d-flex justify-content-between align-items-center">
+                <label asp-for="Input.RememberMe" class="form-check-label text-muted">
+                    <input class="form-check-input me-2" asp-for="Input.RememberMe" />
+                    @Html.DisplayNameFor(m => m.Input.RememberMe)
+                </label>
             </div>
 
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-primary auth-submit-btn mt-2">Create Account</button>
+            <div>
+                <button id="login-submit" type="submit" class="w-100 btn btn-primary auth-submit-btn">Log In</button>
+            </div>
 
             <div class="auth-footer-links">
                 <p class="mb-1">
-                    Already have an account? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Log in here</a>
+                    Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register here</a>
                 </p>
             </div>
         </form>

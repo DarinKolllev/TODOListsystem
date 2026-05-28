@@ -1,43 +1,55 @@
 @model TODOlistsystem.Models.Note
+@using TODOlistsystem.Models
 
 @{
-    ViewData["Title"] = "Create Note";
+    ViewData["Title"] = "Create Task";
 }
 
-<h1>Create Note</h1>
+<div class="auth-container">
+    <div class="glass-panel auth-card">
+        
+        <div class="auth-header">
+            <h1 class="auth-title">Create Task</h1>
+            <p class="auth-subtitle">Add a new goal to your productivity board</p>
+        </div>
 
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="Create" class="auth-form">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
 
             <div class="form-group mb-3">
-                <label asp-for="Content" class="control-label fw-bold">Note Content</label>
-                <textarea asp-for="Content" class="form-control" rows="4" placeholder="What do you need to do?"></textarea>
+                <label asp-for="Content" class="form-label fw-semibold text-main">Task Description</label>
+                <textarea asp-for="Content" class="form-control" rows="3" placeholder="What needs to be done?" required></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="DueDate" class="control-label fw-bold">Due Date</label>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Type" class="form-label fw-semibold text-main">Category</label>
+                    <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<TaskType>()"></select>
+                    <span asp-validation-for="Type" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Priority" class="form-label fw-semibold text-main">Priority</label>
+                    <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<TaskPriority>()"></select>
+                    <span asp-validation-for="Priority" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="DueDate" class="form-label fw-semibold text-main">Due Date (Optional)</label>
                 <input asp-for="DueDate" class="form-control" type="datetime-local" />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Type" class="control-label fw-bold">Task Category</label>
-                <select asp-for="Type" class="form-control" asp-items="Html.GetEnumSelectList<TODOlistsystem.Models.TaskType>()"></select>
-                <span asp-validation-for="Type" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mt-4">
-                <button type="submit" class="btn btn-primary px-4">Create Note</button>
-                <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancel</a>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary auth-submit-btn flex-fill">Create Task</button>
+                <a asp-action="Index" class="btn btn-outline-secondary px-4 d-flex align-items-center justify-content-center" style="border-radius: 12px;">Cancel</a>
             </div>
         </form>
     </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
 }
