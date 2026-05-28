@@ -35,26 +35,68 @@ public class NotesController : Controller
     }
 
     // GET: Notes/Create
-    public IActionResult Create() => View();
+    public IActionResult Create()
+    {
+        return View();
+    }
 
     // POST: Notes/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Content,DueDate,Type")] Note note)
+    public async Task<IActionResult> Create(Note note)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        Console.WriteLine("POST ACTION HIT");
+        // Check validation
+        if (!ModelState.IsValid)
+        {
+            // Print validation errors to console for debugging
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                Console.WriteLine(error.ErrorMessage);
+            }
 
-        if (!ModelState.IsValid) return View(note);
+            return View(note);
+        }
 
-        note.Id = Guid.NewGuid();
-        note.UserId = userId;
-        note.CreatedAt = DateTime.UtcNow;
+        try
+        {
+            // Set default values
+            note.Id = Guid.NewGuid();
 
-        _context.Notes.Add(note);
-        await _context.SaveChangesAsync();
+            note.CreatedAt = DateTime.UtcNow;
+            note.UpdatedAt = DateTime.UtcNow;
 
-        return RedirectToAction(nameof(Index));
+            note.IsDeleted = false;
+            note.IsCompleted = false;
+            note.IsActive = true;
+
+            // Get current logged-in user
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            note.UserId = userId;
+
+            // Save note
+            _context.Notes.Add(note);
+
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine("NOTE SAVED SUCCESSFULLY");
+
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("SAVE ERROR:");
+            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.InnerException?.Message);
+
+            return View(note);
+        }
     }
 
     // GET: Notes/Edit/5
@@ -198,20 +240,21 @@ public class NotesController : Controller
 
         var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
 
-        var progress = await _context.Notes
-            .AsNoTracking()
-            .Where(n =>
-                n.UserId == userId &&
-                n.IsCompleted &&
-                n.UpdatedAt >= startOfMonth)
-            .GroupBy(n => n.UpdatedAt!.Value.Date)
-            .Select(g => new
-            {
-                Date = g.Key.ToString("yyyy-MM-dd"),
-                Count = g.Count()
-            })
-            .OrderBy(g => g.Date)
-            .ToListAsync();
+        var progress = (await _context.Notes
+      .AsNoTracking()
+      .Where(n =>
+          n.UserId == userId &&
+          n.IsCompleted &&
+          n.UpdatedAt >= startOfMonth)
+      .ToListAsync())
+      .GroupBy(n => n.UpdatedAt!.Value.Date)
+      .Select(g => new
+      {
+          Date = g.Key.ToString("yyyy-MM-dd"),
+          Count = g.Count()
+      })
+      .OrderBy(g => g.Date)
+      .ToList();
 
         return Ok(progress);
     }

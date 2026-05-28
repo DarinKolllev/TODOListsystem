@@ -44,11 +44,10 @@ namespace TODOlistsystem.Models
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DueDate { get; set; }
 
-        [Required]
-        public string UserId { get; set; } = null!;
+        public string? UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public virtual ApplicationUser User { get; set; } = null!;
+        public virtual ApplicationUser? User { get; set; }
 
         public string? SharedWithUserId { get; set; }
         public string? AssignedToUserId { get; set; }
