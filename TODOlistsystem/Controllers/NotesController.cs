@@ -66,8 +66,9 @@ public class NotesController : Controller
     // POST: Notes/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Note note)
+    public async Task<IActionResult> Create([Bind("Content,Type,Priority,DueDate")] Note note)
     {
+        note.Priority = note.Priority;
         Console.WriteLine("POST ACTION HIT");
         // Check validation
         if (!ModelState.IsValid)

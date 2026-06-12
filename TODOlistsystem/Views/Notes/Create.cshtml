@@ -1,74 +1,66 @@
+
 @model TODOlistsystem.Models.Note
 
 @{
-    ViewData["Title"] = "Create Note";
+    ViewData["Title"] = "Create Task";
 }
 
-<h1>Create Note</h1>
-
-<hr />
-
-<div class="row">
-    <div class="col-md-6">
-
-        <form asp-controller="Notes"
-              asp-action="Create"
-              method="post">
-
-            @Html.AntiForgeryToken()
-
-            <div asp-validation-summary="All"
-                 class="text-danger mb-3">
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Task</h4>
             </div>
+            <div class="card-body">
+                <form asp-controller="Notes" asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
 
-            <div class="mb-3">
-                <label asp-for="Content" class="form-label"></label>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                <input asp-for="Content"
-                       class="form-control" />
+                    <div class="mb-4">
+                        <label asp-for="Content" class="form-label fw-bold">What needs to be done?</label>
+                        <textarea asp-for="Content" class="form-control" rows="3" placeholder="Describe your task..."></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
 
-                <span asp-validation-for="Content"
-                      class="text-danger">
-                </span>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Type" class="form-label fw-bold">Category</label>
+                            <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<TODOlistsystem.Models.TaskType>()">
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Priority" class="form-label fw-bold">Priority</label>
+                            <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<TODOlistsystem.Models.TaskPriority>()">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="DueDate" class="form-label fw-bold">Due Date</label>
+                        <input asp-for="DueDate" type="datetime-local" class="form-control" />
+                        <small class="text-muted">Optional - leave blank if no deadline</small>
+                        <span asp-validation-for="DueDate" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-4" />
+
+                      <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i> Create Task
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i> Cancel
+                                            </a>
+                                        </div>
+                </form>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="Type" class="form-label"></label>
-
-                <select asp-for="Type" class="form-control">
-                    <option value="0">Personal</option>
-                    <option value="1">Work</option>
-                    <option value="2">Study</option>
-                </select>
-
-                <span asp-validation-for="Type"
-                      class="text-danger">
-                </span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="DueDate" class="form-label"></label>
-
-                <input asp-for="DueDate"
-                       type="datetime-local"
-                       class="form-control" />
-
-                <span asp-validation-for="DueDate"
-                      class="text-danger">
-                </span>
-            </div>
-
-            <button type="submit" class="btn btn-primary">
-                SAVE NOTE
-            </button>
-
-        </form>
-
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
+

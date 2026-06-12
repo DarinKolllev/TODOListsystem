@@ -1,78 +1,99 @@
-﻿@model Note
+﻿
+@model TODOlistsystem.Models.Note
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Task Details";
 }
 
-<h1>Details</h1>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Task Details</h4>
+                @if (Model.IsCompleted)
+                {
+                    <span class="badge bg-success">Completed</span>
+                }
+                else if (Model.DueDate.HasValue && Model.DueDate.Value < DateTime.Now)
+                {
+                    <span class="badge bg-danger">Overdue</span>
+                }
+                else
+                {
+                    <span class="badge bg-primary">Active</span>
+                }
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5 class="text-muted small text-uppercase">Content</h5>
+                    <p class="fs-5">@Model.Content</p>
+                </div>
 
-<div>
-    <h4>Note</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Content)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Content)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActive)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsCompleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsCompleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DueDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DueDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SharedWithUserId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SharedWithUserId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AssignedToUserId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AssignedToUserId)
-        </dd>
-    </dl>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h5 class="text-muted small text-uppercase">Category</h5>
+                        <p class="fw-bold">@Model.Type</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h5 class="text-muted small text-uppercase">Priority</h5>
+                        @switch (Model.Priority)
+                        {
+                            case TODOlistsystem.Models.TaskPriority.Urgent:
+                                <span class="badge bg-danger">Urgent</span>
+                                break;
+                            case TODOlistsystem.Models.TaskPriority.High:
+                                <span class="badge bg-warning text-dark">High</span>
+                                break;
+                            case TODOlistsystem.Models.TaskPriority.Medium:
+                                <span class="badge bg-info">Medium</span>
+                                break;
+                            default:
+                                <span class="badge bg-secondary">Low</span>
+                                break;
+                        }
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h5 class="text-muted small text-uppercase">Due Date</h5>
+                        <p>
+                            @if (Model.DueDate.HasValue)
+                            {
+                                @Model.DueDate.Value.ToString("MMM dd, yyyy h:mm tt")
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not set</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h5 class="text-muted small text-uppercase">Created</h5>
+                        <p>@Model.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</p>
+                    </div>
+                </div>
+
+                @if (Model.User != null)
+                {
+                    <div class="mb-3">
+                        <h5 class="text-muted small text-uppercase">Created By</h5>
+                        <p>@Model.User.Email</p>
+                    </div>
+                }
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="bi bi-pencil me-1"></i> Edit
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary ms-auto">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+                                                        
